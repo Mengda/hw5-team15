@@ -15,6 +15,7 @@ import org.apache.uima.resource.ResourceInitializationException;
 
 import edu.cmu.lti.oaqa.core.provider.solr.SolrWrapper;
 import edu.cmu.lti.qalab.types.CandidateSentence;
+import edu.cmu.lti.qalab.types.Dependency;
 import edu.cmu.lti.qalab.types.NER;
 import edu.cmu.lti.qalab.types.NounPhrase;
 import edu.cmu.lti.qalab.types.Question;
@@ -51,14 +52,14 @@ public class QuestionCandSentSimilarityMatcher  extends JCasAnnotator_ImplBase{
 	
 	@Override
 	public void process(JCas aJCas) throws AnalysisEngineProcessException {
+	  
 		TestDocument testDoc=Utils.getTestDocumentFromCAS(aJCas);
 		String testDocId=testDoc.getId();
 		ArrayList<Sentence>sentenceList=Utils.getSentenceListFromTestDocCAS(aJCas);
 		ArrayList<QuestionAnswerSet>qaSet=Utils.getQuestionAnswerSetFromTestDocCAS(aJCas);
 		
 		for(int i=0;i<qaSet.size();i++){
-			
-			
+					
 			Question question=qaSet.get(i).getQuestion();
 			System.out.println("========================================================");
 			System.out.println("Question: "+question.getText());
@@ -74,6 +75,8 @@ public class QuestionCandSentSimilarityMatcher  extends JCasAnnotator_ImplBase{
 			solrQuery.setFields("*", "score");
 			try {
 				SolrDocumentList results=solrWrapper.runQuery(solrQuery, TOP_SEARCH_RESULTS);
+				//System.out.println("YingSheng-candidatenum:");
+				//System.out.println(results.size());
 				for(int j=0;j<results.size();j++){
 					SolrDocument doc=results.get(j);					
 					String sentId=doc.get("id").toString();
@@ -124,6 +127,18 @@ public class QuestionCandSentSimilarityMatcher  extends JCasAnnotator_ImplBase{
 		for(int i=0;i<neList.size();i++){
 			solrQuery+="namedentities:\""+neList.get(i).getText()+"\" ";
 		}
+		
+		ArrayList<Dependency> dpList = Utils
+            .fromFSListToCollection(question.getDependencies(),
+                    Dependency.class);
+		for (int i=0; i<dpList.size(); i++) {
+		  String rel = dpList.get(i).getRelation();
+      String gov = dpList.get(i).getGovernor().getText();
+      String dep = dpList.get(i).getDependent().getText();
+      String depText = rel + "(" + gov + "," + dep + ")";
+		  solrQuery+="dependencies:\""+depText+"\" ";
+		}
+		
 		solrQuery=solrQuery.trim();
 		
 		
