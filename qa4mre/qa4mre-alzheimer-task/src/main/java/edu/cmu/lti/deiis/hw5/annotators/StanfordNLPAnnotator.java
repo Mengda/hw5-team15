@@ -66,6 +66,7 @@ public class StanfordNLPAnnotator extends JCasAnnotator_ImplBase {
 
 			try {
 				// System.out.println("Entering stanford annotation");
+				System.out.println(filteredSents[i]);
 				stanfordAnnotator.annotate(document);
 				// System.out.println("Out of stanford annotation");
 			} catch (Exception e) {

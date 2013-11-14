@@ -121,9 +121,9 @@ public class QA4MRETestDocReader extends CollectionReader_ImplBase {
 				Answer ans = new Answer(jcas);
 
 				if (isCorrect != null) {
-					if (isCorrect.equals("Yes")){
+					if (isCorrect.equals("Yes")) {
 						ans.setIsCorrect(true);
-					}else{
+					} else {
 						ans.setIsCorrect(false);
 					}
 				} else {
@@ -165,7 +165,7 @@ public class QA4MRETestDocReader extends CollectionReader_ImplBase {
 			bfr = new BufferedReader(new FileReader(testFile[nCurrFile]));
 			char chars[] = new char[4096];
 			while ((bfr.read(chars)) != -1) {
-				xmlText += new String(chars).trim();
+				xmlText += new String(chars);
 				chars = null;
 				chars = new char[4096];
 			}
@@ -229,9 +229,14 @@ public class QA4MRETestDocReader extends CollectionReader_ImplBase {
 	}
 
 	public void parseTestDocument(String xmlText) throws Exception {
+		System.out.println(xmlText);
 
 		DOMParser parser = new DOMParser();
-		parser.parse(new InputSource(new StringReader(xmlText)));
+		try {
+			parser.parse(new InputSource(new StringReader(xmlText)));
+		} catch (Exception e) {
+			System.exit(1);
+		}
 		Document document = parser.getDocument();
 
 		NodeList topicNodeList = document.getElementsByTagName("topic");
@@ -239,13 +244,13 @@ public class QA4MRETestDocReader extends CollectionReader_ImplBase {
 		for (int i = 0; i < topicNodeList.getLength(); i++) {
 
 			Element topicElement = (Element) topicNodeList.item(i);
-			String topicId=topicElement.getAttribute("t_id");
+			String topicId = topicElement.getAttribute("t_id");
 			NodeList readingTestNodeList = topicElement
 					.getElementsByTagName("reading-test");
-			
+
 			documents = readingTestNodeList;
-			//Element eleReading=(Element)readingTestNodeList;
-			//String rId=eleReading.getAttribute("r_id");
+			// Element eleReading=(Element)readingTestNodeList;
+			// String rId=eleReading.getAttribute("r_id");
 		}
 
 	}
@@ -271,8 +276,8 @@ public class QA4MRETestDocReader extends CollectionReader_ImplBase {
 		// return nCurrFile < 10;
 		// return nCurrFile < testFile.length;
 		if (nCurrFile < testFile.length && nCurrDoc < documents.getLength()) {
-			//System.out.println("***********True: currFile " + nCurrFile
-				//	+ "\tcurrDoc " + nCurrDoc);
+			// System.out.println("***********True: currFile " + nCurrFile
+			// + "\tcurrDoc " + nCurrDoc);
 			return true;
 		}
 		return false;
