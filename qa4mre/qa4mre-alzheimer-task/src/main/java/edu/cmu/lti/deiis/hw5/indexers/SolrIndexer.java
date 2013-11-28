@@ -21,6 +21,7 @@ import edu.cmu.lti.qalab.types.NounPhrase;
 import edu.cmu.lti.qalab.types.Sentence;
 import edu.cmu.lti.qalab.types.Synonym;
 import edu.cmu.lti.qalab.types.TestDocument;
+import edu.cmu.lti.qalab.types.Token;
 import edu.cmu.lti.qalab.utils.Utils;
 
 public class SolrIndexer extends JCasAnnotator_ImplBase {
@@ -76,10 +77,13 @@ public class SolrIndexer extends JCasAnnotator_ImplBase {
 				indexMap.put("docid", id);
 				indexMap.put("id", sentId);
 				indexMap.put("text", sentText);
+				
 
+				
 				FSList fsNounList = sent.getPhraseList();
 				ArrayList<NounPhrase> nounPhrases = Utils
 						.fromFSListToCollection(fsNounList, NounPhrase.class);
+							
 				ArrayList<String> nnList = new ArrayList<String>();
 				for (int j = 0; j < nounPhrases.size(); j++) {
 					//NounPhrase nnPhr=nounPhrases.get(j);
@@ -123,7 +127,10 @@ public class SolrIndexer extends JCasAnnotator_ImplBase {
 				  
 				  indexMap.put("dependencies", depList);
 				}
-
+				
+				
+				
+				
 				SolrInputDocument solrInpDoc = this.wrapper
 						.buildSolrDocument(indexMap);
 				String docXML = this.wrapper.convertSolrDocInXML(solrInpDoc);

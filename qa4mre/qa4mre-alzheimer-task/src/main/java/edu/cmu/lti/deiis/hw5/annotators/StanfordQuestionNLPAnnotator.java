@@ -128,7 +128,7 @@ public class StanfordQuestionNLPAnnotator extends JCasAnnotator_ImplBase {
 					answer.addToIndexes();
 					choiceList.set(j, answer);
 
-					System.out.println("Answer no. " + j + " processed");
+					//YSH: System.out.println("Answer no. " + j + " processed");
 				}
 				
 			}
@@ -216,7 +216,7 @@ public class StanfordQuestionNLPAnnotator extends JCasAnnotator_ImplBase {
 				annQuestion.addToIndexes();
 				questionList.set(i, annQuestion);
 				sentNo++;
-				System.out.println("Question no. " + sentNo + " processed");
+				//YSH: System.out.println("Question no. " + sentNo + " processed");
 			}
 		}
 		// FSList fsQuestionList = Utils.createQuestionList(jCas, questionList);

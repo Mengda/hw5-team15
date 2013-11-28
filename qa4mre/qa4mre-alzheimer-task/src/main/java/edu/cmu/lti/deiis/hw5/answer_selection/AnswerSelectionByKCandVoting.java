@@ -57,17 +57,19 @@ public class AnswerSelectionByKCandVoting extends JCasAnnotator_ImplBase {
           break;
         }
       }
-
+      
       HashMap<String, Double> hshAnswer = new HashMap<String, Double>();
 
       for (int c = 0; c < topK; c++) {
 
         CandidateSentence candSent = candSentList.get(c);
-
+        
         ArrayList<CandidateAnswer> candAnswerList = Utils.fromFSListToCollection(
                 candSent.getCandAnswerList(), CandidateAnswer.class);
         String selectedAnswer = "";
         double maxScore = Double.NEGATIVE_INFINITY;
+        
+        
         for (int j = 0; j < candAnswerList.size(); j++) {
 
           CandidateAnswer candAns = candAnswerList.get(j);
@@ -75,6 +77,24 @@ public class AnswerSelectionByKCandVoting extends JCasAnnotator_ImplBase {
 
           double totalScore = candAns.getSimilarityScore() + candAns.getSynonymScore()
                   + candAns.getPMIScore();
+          
+          //ying
+          boolean isNum=false;
+          if (question.getText().contains("How many")) {
+            try  
+            {               
+               Double.parseDouble(candAns.toString());  
+               isNum=true;  
+            }  
+            catch(Exception e )  
+            {  
+               isNum=false;  
+            }
+            
+            if (isNum) {
+              totalScore+=10;
+            }
+          }
 
           if (totalScore > maxScore) {
             maxScore = totalScore;

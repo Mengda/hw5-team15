@@ -14,6 +14,7 @@ import org.apache.uima.jcas.cas.FSList;
 import org.apache.uima.resource.ResourceInitializationException;
 
 import edu.cmu.lti.oaqa.core.provider.solr.SolrWrapper;
+import edu.cmu.lti.qalab.types.Answer;
 import edu.cmu.lti.qalab.types.CandidateSentence;
 import edu.cmu.lti.qalab.types.Dependency;
 import edu.cmu.lti.qalab.types.NER;
@@ -22,6 +23,7 @@ import edu.cmu.lti.qalab.types.Question;
 import edu.cmu.lti.qalab.types.QuestionAnswerSet;
 import edu.cmu.lti.qalab.types.Sentence;
 import edu.cmu.lti.qalab.types.TestDocument;
+import edu.cmu.lti.qalab.types.Token;
 import edu.cmu.lti.qalab.utils.Utils;
 
 public class QuestionCandSentSimilarityMatcher  extends JCasAnnotator_ImplBase{
@@ -31,7 +33,7 @@ public class QuestionCandSentSimilarityMatcher  extends JCasAnnotator_ImplBase{
 	//IndexSchema indexSchema;
 	String coreName;
 	String schemaName;
-	int TOP_SEARCH_RESULTS=10;
+	int TOP_SEARCH_RESULTS=50;
 
 	@Override
 	public void initialize(UimaContext context)
@@ -46,8 +48,7 @@ public class QuestionCandSentSimilarityMatcher  extends JCasAnnotator_ImplBase{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		
+				
 	}
 	
 	@Override
@@ -61,6 +62,9 @@ public class QuestionCandSentSimilarityMatcher  extends JCasAnnotator_ImplBase{
 		for(int i=0;i<qaSet.size();i++){
 					
 			Question question=qaSet.get(i).getQuestion();
+			//YingSheng ms2 start
+			ArrayList<Answer> answerList=Utils.fromFSListToCollection(qaSet.get(i).getAnswerList(), Answer.class);
+			//YingSheng ms2 end
 			System.out.println("========================================================");
 			System.out.println("Question: "+question.getText());
 			String searchQuery=this.formSolrQuery(question);
@@ -77,6 +81,7 @@ public class QuestionCandSentSimilarityMatcher  extends JCasAnnotator_ImplBase{
 				SolrDocumentList results=solrWrapper.runQuery(solrQuery, TOP_SEARCH_RESULTS);
 				//System.out.println("YingSheng-candidatenum:");
 				//System.out.println(results.size());
+							
 				for(int j=0;j<results.size();j++){
 					SolrDocument doc=results.get(j);					
 					String sentId=doc.get("id").toString();
@@ -84,11 +89,27 @@ public class QuestionCandSentSimilarityMatcher  extends JCasAnnotator_ImplBase{
 					if(!testDocId.equals(docId)){
 						continue;
 					}
+					
 					String sentIdx=sentId.replace(docId,"").replace("_", "").trim();
 					int idx=Integer.parseInt(sentIdx);
 					Sentence annSentence=sentenceList.get(idx);
 					
 					String sentence=doc.get("text").toString();
+					 //YingSheng ms2 start
+					boolean containsCandAns=false;
+					for (int k=0; k<answerList.size(); k++) {
+					  ArrayList<Token> tokenList=Utils.fromFSListToCollection(answerList.get(k).getTokenList(), Token.class);
+					  for (int kk=0; kk<tokenList.size(); kk++) {
+  					  if (sentence.toLowerCase().contains(tokenList.get(kk).getText().toLowerCase())) {
+  					    containsCandAns=true;
+  					    break;
+  					  }
+					  }
+					  if (!containsCandAns) {break;}
+					}
+					if (!containsCandAns) {continue;}					
+					//YingSheng ms2 end
+					
 					double relScore=Double.parseDouble(doc.get("score").toString());
 					CandidateSentence candSent=new CandidateSentence(aJCas);
 					candSent.setSentence(annSentence);
@@ -113,6 +134,7 @@ public class QuestionCandSentSimilarityMatcher  extends JCasAnnotator_ImplBase{
 	
 		
 	}
+	
 
 	public String formSolrQuery(Question question){
 		String solrQuery="";
@@ -128,6 +150,8 @@ public class QuestionCandSentSimilarityMatcher  extends JCasAnnotator_ImplBase{
 			solrQuery+="namedentities:\""+neList.get(i).getText()+"\" ";
 		}
 		
+		//yingsheng-baseline-start
+		
 		ArrayList<Dependency> dpList = Utils
             .fromFSListToCollection(question.getDependencies(),
                     Dependency.class);
@@ -139,6 +163,7 @@ public class QuestionCandSentSimilarityMatcher  extends JCasAnnotator_ImplBase{
 		  solrQuery+="dependencies:\""+depText+"\" ";
 		}
 		
+		//yingsheng-baseline-end
 		solrQuery=solrQuery.trim();
 		
 		

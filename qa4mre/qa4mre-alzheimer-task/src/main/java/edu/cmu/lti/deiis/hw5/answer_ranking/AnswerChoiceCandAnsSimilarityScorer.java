@@ -101,8 +101,7 @@ public class AnswerChoiceCandAnsSimilarityScorer extends JCasAnnotator_ImplBase 
 
 					}
 
-					System.out.println(choiceList.get(j).getText() + "\t"
-							+ nnMatch);
+					System.out.println(choiceList.get(j).getText() + "\t" + nnMatch);
 					CandidateAnswer candAnswer = null;
 					if (candSent.getCandAnswerList() == null) {
 						candAnswer = new CandidateAnswer(aJCas);
@@ -119,7 +118,9 @@ public class AnswerChoiceCandAnsSimilarityScorer extends JCasAnnotator_ImplBase 
 					candAnswer.setSimilarityScore(nnMatch);
 					candAnsList.add(candAnswer);
 				}
-
+				
+				
+				
 				FSList fsCandAnsList = Utils.fromCollectionToFSList(aJCas,
 						candAnsList);
 				candSent.setCandAnswerList(fsCandAnsList);
