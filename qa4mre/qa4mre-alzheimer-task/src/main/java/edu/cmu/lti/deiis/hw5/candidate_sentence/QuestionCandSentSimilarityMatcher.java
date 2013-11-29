@@ -67,7 +67,9 @@ public class QuestionCandSentSimilarityMatcher  extends JCasAnnotator_ImplBase{
 			//YingSheng ms2 end
 			System.out.println("========================================================");
 			System.out.println("Question: "+question.getText());
-			String searchQuery=this.formSolrQuery(question);
+			//ysheng ms2.5
+			String searchQuery=this.formSolrQuery(question,answerList);
+			//ysheng ms2.5
 			if(searchQuery.trim().equals("")){
 				continue;
 			}
@@ -96,6 +98,7 @@ public class QuestionCandSentSimilarityMatcher  extends JCasAnnotator_ImplBase{
 					
 					String sentence=doc.get("text").toString();
 					 //YingSheng ms2 start
+					/*
 					boolean containsCandAns=false;
 					for (int k=0; k<answerList.size(); k++) {
 					  ArrayList<Token> tokenList=Utils.fromFSListToCollection(answerList.get(k).getTokenList(), Token.class);
@@ -107,7 +110,8 @@ public class QuestionCandSentSimilarityMatcher  extends JCasAnnotator_ImplBase{
 					  }
 					  if (!containsCandAns) {break;}
 					}
-					if (!containsCandAns) {continue;}					
+					if (!containsCandAns) {continue;}		
+					*/			
 					//YingSheng ms2 end
 					
 					double relScore=Double.parseDouble(doc.get("score").toString());
@@ -136,16 +140,29 @@ public class QuestionCandSentSimilarityMatcher  extends JCasAnnotator_ImplBase{
 	}
 	
 
-	public String formSolrQuery(Question question){
+	public String formSolrQuery(Question question, ArrayList<Answer> answerList){
 		String solrQuery="";
 		
 		ArrayList<NounPhrase>nounPhrases=Utils.fromFSListToCollection(question.getNounList(), NounPhrase.class);
+		
+		//ysheng 2.5 START
+		for (int i=0; i<answerList.size(); i++) {
+		  nounPhrases.addAll(Utils.fromFSListToCollection(answerList.get(i).getNounPhraseList(), NounPhrase.class));
+		}
+		//ysheng 2.5 END
 		
 		for(int i=0;i<nounPhrases.size();i++){
 			solrQuery+="nounphrases:\""+nounPhrases.get(i).getText()+"\" ";			
 		}
 		
 		ArrayList<NER>neList=Utils.fromFSListToCollection(question.getNerList(), NER.class);
+		
+    //ysheng 2.5 START
+    for (int i=0; i<answerList.size(); i++) {
+      neList.addAll(Utils.fromFSListToCollection(answerList.get(i).getNerList(), NER.class));
+    }
+    //ysheng 2.5 END
+		
 		for(int i=0;i<neList.size();i++){
 			solrQuery+="namedentities:\""+neList.get(i).getText()+"\" ";
 		}
