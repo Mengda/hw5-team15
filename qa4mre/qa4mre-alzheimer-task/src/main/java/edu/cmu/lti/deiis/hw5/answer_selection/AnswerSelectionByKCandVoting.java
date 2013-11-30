@@ -1,5 +1,8 @@
 package edu.cmu.lti.deiis.hw5.answer_selection;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -32,12 +35,31 @@ public class AnswerSelectionByKCandVoting extends JCasAnnotator_ImplBase {
   @Override
   public void process(JCas aJCas) throws AnalysisEngineProcessException {
     TestDocument testDoc = Utils.getTestDocumentFromCAS(aJCas);
+    //ying
+    String docId = testDoc.getId();
+   //ying
     ArrayList<QuestionAnswerSet> qaSet = Utils.fromFSListToCollection(testDoc.getQaList(),
             QuestionAnswerSet.class);
     int matched = 0;
     int total = 0;
     int unanswered = 0;
-
+    
+    //ying
+ 
+    PrintWriter ScoreWriter=null;
+    String outf="MLfolder/"+docId+"_score.txt";
+    try {
+      ScoreWriter = new PrintWriter(outf, "UTF-8");
+    } catch (FileNotFoundException e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
+    } catch (UnsupportedEncodingException e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
+    }
+   
+    //ying
+    
     for (int i = 0; i < qaSet.size(); i++) {
 
       Question question = qaSet.get(i).getQuestion();
@@ -79,23 +101,18 @@ public class AnswerSelectionByKCandVoting extends JCasAnnotator_ImplBase {
                   + candAns.getPMIScore();
           
           //ying
-          boolean isNum=false;
-          if (question.getText().contains("How many")) {
-            try  
-            {               
-               Double.parseDouble(candAns.toString());  
-               isNum=true;  
-            }  
-            catch(Exception e )  
-            {  
-               isNum=false;  
-            }
-            
-            if (isNum) {
-              totalScore+=10;
-            }
-          }
-
+          String summary=new String();
+          if (candAns.getText().equals(correct)) {
+            summary+="1 ";
+          } else {summary+="-1 ";}
+          summary+=candAns.getSimilarityScore();
+          summary+=" ";
+          summary+=candAns.getSynonymScore();
+          summary+=" ";
+          summary+=candAns.getPMIScore();
+          ScoreWriter.println(summary);
+          //ying
+        
           if (totalScore > maxScore) {
             maxScore = totalScore;
             selectedAnswer = answer;
@@ -137,6 +154,7 @@ public class AnswerSelectionByKCandVoting extends JCasAnnotator_ImplBase {
     double cAt1 = (((double) matched) / ((double) total) * unanswered + (double) matched)
             * (1.0 / total);
     System.out.println("c@1 score:" + cAt1);
+    ScoreWriter.close();
 
   }
 
