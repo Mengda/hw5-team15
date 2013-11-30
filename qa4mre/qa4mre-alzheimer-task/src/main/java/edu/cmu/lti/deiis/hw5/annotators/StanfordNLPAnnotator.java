@@ -66,7 +66,7 @@ public class StanfordNLPAnnotator extends JCasAnnotator_ImplBase {
 
 			try {
 				// System.out.println("Entering stanford annotation");
-				System.out.println(filteredSents[i]);
+				//YSH: System.out.println(filteredSents[i]);
 				stanfordAnnotator.annotate(document);
 				// System.out.println("Out of stanford annotation");
 			} catch (Exception e) {
@@ -139,7 +139,7 @@ public class StanfordNLPAnnotator extends JCasAnnotator_ImplBase {
 				annSentence.addToIndexes();
 				sentList.add(annSentence);
 				sentNo++;
-				System.out.println("Sentence no. " + sentNo + " processed");
+				//YSH: System.out.println("Sentence no. " + sentNo + " processed");
 			}
 		}
 		FSList fsSentList = this.createSentenceList(jCas, sentList);
