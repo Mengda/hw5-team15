@@ -21,23 +21,22 @@ import edu.cmu.lti.qalab.utils.Utils;
 
 public class AnswerChoiceCandAnsSimilarityScorer extends JCasAnnotator_ImplBase {
 
-	int K_CANDIDATES = 5;
+  int K_CANDIDATES = 5;
 
-	@Override
-	public void initialize(UimaContext context)
-			throws ResourceInitializationException {
-		super.initialize(context);
-		K_CANDIDATES=(Integer)context.getConfigParameterValue("K_CANDIDATES");
-	}
+  @Override
+  public void initialize(UimaContext context) throws ResourceInitializationException {
+    super.initialize(context);
+    K_CANDIDATES = (Integer) context.getConfigParameterValue("K_CANDIDATES");
+  }
 
-	@Override
+  @Override
 	public void process(JCas aJCas) throws AnalysisEngineProcessException {
 		TestDocument testDoc = Utils.getTestDocumentFromCAS(aJCas);
 		// String testDocId = testDoc.getId();
 		ArrayList<QuestionAnswerSet> qaSet = Utils
 				.getQuestionAnswerSetFromTestDocCAS(aJCas);
 
-		for (int i = 0; i < qaSet.size(); i++) {
+		for (int i = 0; i < qaSet.size(); i++) {// each question
 
 			Question question = qaSet.get(i).getQuestion();
 			System.out.println("Question: " + question.getText());
@@ -49,10 +48,21 @@ public class AnswerChoiceCandAnsSimilarityScorer extends JCasAnnotator_ImplBase 
 							CandidateSentence.class);
 
 			int topK = Math.min(K_CANDIDATES, candSentList.size());
-			for (int c = 0; c < topK; c++) {
-
+			for (int c = 0; c < topK; c++) {// each candidate sentence
+			  
 				CandidateSentence candSent = candSentList.get(c);
+				
+				
+				//
+				String tmpQuestion = chunkScoreCalculator.questionReform(question.getText());
+				double similarity = chunkScoreCalculator.ChunkSimilarity(tmpQuestion, candSent.getSentence().getText() );	
+				System.out.println(tmpQuestion);
+        System.out.println(candSent.getSentence().getText());
 
+				System.out.println("similarity is: " + similarity);
+				//
+				
+				
 				ArrayList<NounPhrase> candSentNouns = Utils
 						.fromFSListToCollection(candSent.getSentence()
 								.getPhraseList(), NounPhrase.class);
@@ -101,7 +111,7 @@ public class AnswerChoiceCandAnsSimilarityScorer extends JCasAnnotator_ImplBase 
 
 					}
 
-					System.out.println(choiceList.get(j).getText() + "\t" + nnMatch);
+					System.out.println(choiceList.get(j).getText() + "\t" + nnMatch*similarity);
 					CandidateAnswer candAnswer = null;
 					if (candSent.getCandAnswerList() == null) {
 						candAnswer = new CandidateAnswer(aJCas);
@@ -115,7 +125,7 @@ public class AnswerChoiceCandAnsSimilarityScorer extends JCasAnnotator_ImplBase 
 					candAnswer.setText(answer.getText());
 					candAnswer.setQId(answer.getQuestionId());
 					candAnswer.setChoiceIndex(j);
-					candAnswer.setSimilarityScore(nnMatch);
+					candAnswer.setSimilarityScore(nnMatch*similarity);
 					candAnsList.add(candAnswer);
 				}
 				
@@ -139,5 +149,4 @@ public class AnswerChoiceCandAnsSimilarityScorer extends JCasAnnotator_ImplBase 
 		testDoc.setQaList(fsQASet);
 
 	}
-
 }

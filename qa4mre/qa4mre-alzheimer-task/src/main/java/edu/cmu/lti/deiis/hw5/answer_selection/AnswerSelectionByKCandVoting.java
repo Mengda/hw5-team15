@@ -104,7 +104,7 @@ public class AnswerSelectionByKCandVoting extends JCasAnnotator_ImplBase {
           String summary=new String();
           if (candAns.getText().equals(correct)) {
             summary+="1 ";
-          } else {summary+="-1 ";}
+          } else {summary+="0 ";}
           summary+=candAns.getSimilarityScore();
           summary+=" ";
           summary+=candAns.getSynonymScore();
