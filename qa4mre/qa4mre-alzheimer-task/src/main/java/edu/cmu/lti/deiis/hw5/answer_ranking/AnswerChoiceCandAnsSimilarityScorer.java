@@ -48,16 +48,18 @@ public class AnswerChoiceCandAnsSimilarityScorer extends JCasAnnotator_ImplBase 
 							CandidateSentence.class);
 
 			int topK = Math.min(K_CANDIDATES, candSentList.size());
+			String tmpQuestion = chunkScoreCalculator.questionReform(question.getText());
+			chunkScoreCalculator.SetQuestion(tmpQuestion);
 			for (int c = 0; c < topK; c++) {// each candidate sentence
 			  
 				CandidateSentence candSent = candSentList.get(c);
 				
 				
 				//
-				String tmpQuestion = chunkScoreCalculator.questionReform(question.getText());
-				double similarity = chunkScoreCalculator.ChunkSimilarity(tmpQuestion, candSent.getSentence().getText() );	
+				
+				double similarity = chunkScoreCalculator.AnswerSimilarity(candSent.getSentence().getText() );
 				System.out.println(tmpQuestion);
-        System.out.println(candSent.getSentence().getText());
+				System.out.println(candSent.getSentence().getText());
 
 				System.out.println("similarity is: " + similarity);
 				//
