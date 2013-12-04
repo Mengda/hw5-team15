@@ -8,25 +8,35 @@ import java.util.Random;
 
 public class parameterLearner {
 
-	@SuppressWarnings("resource")
+	
 	static public void main(String[] args) throws Exception {
-		Double maxScore = 0.;
+		
+		Double maxScore = -1.;
+		
+		File file = new File("parameterInstance.txt");
+		BufferedReader br = new BufferedReader(new FileReader(file));
+		ArrayList<Instance> instances = new ArrayList<Instance>();
+		String line = br.readLine();
+
+		while (line != null) {
+			instances.add(new Instance(line));
+			line = br.readLine();
+		}
+		br.close();
+		
+		ArrayList<Double> ones = new ArrayList<Double>();
+		for(int i = 0; i < instances.get(0).x.size(); ++i){
+			ones.add(new Double(1.));
+		}
+		
+		Test(ones, instances);
+		
 		for (int trycount = 0; trycount < 10; ++trycount) {
-			File file = new File("parameterInstance.txt");
-			BufferedReader br = new BufferedReader(new FileReader(file));
-			ArrayList<Instance> instances = new ArrayList<Instance>();
-			String line = br.readLine();
-
-			while (line != null) {
-				instances.add(new Instance(line));
-				line = br.readLine();
-			}
-
+			
 			ArrayList<Double> result = Train(instances);
-			
 			Double curScore = Test(result, instances);
-			
-			if(curScore > maxScore){
+
+			if (curScore > maxScore) {
 				maxScore = curScore;
 				for (Double d : result) {
 					System.out.println(d);
@@ -39,18 +49,21 @@ public class parameterLearner {
 		int correct = 0, incorrect = 0;
 		int totalInstance = instances.size();
 		for (int i = 0; i < totalInstance / 5; ++i) {
-			Double trueScore = 0.;
+			int trueIndex = 0;
+			int maxIndex = 0;
 			Double maxScore = 0.;
 			for (int j = 0; j < 5; ++j) {
 				int index = i * 5 + j;
 				Double p = 1. / (1 + Math.exp(-InnerProduct(w,
 						instances.get(index).x)));
 				if (instances.get(index).y == 1)
-					trueScore = p;
-				if (p > maxScore)
+					trueIndex = j;
+				if (p > maxScore){
 					maxScore = p;
+					maxIndex = j;
+				}
 			}
-			if (Math.abs(trueScore - maxScore) < 0.0001)
+			if (trueIndex == maxIndex)
 				++correct;
 			else
 				++incorrect;
@@ -62,19 +75,15 @@ public class parameterLearner {
 	public static ArrayList<Double> Train(ArrayList<Instance> instances) {
 		ArrayList<Double> result = new ArrayList<Double>(instances.get(0).x);
 		for (int i = 0; i < result.size(); ++i) {
-			result.set(i, 0.);
+			result.set(i, 1.);
 		}
 		Random r = new Random();
 		Integer instanceSize = instances.size();
-		for (int epoch = 1; epoch < 10000000; ++epoch) {
+		for (int epoch = 1; epoch < 20000000; ++epoch) {
 			Integer index = Math.abs(r.nextInt()) % instanceSize;
 			Double p = 1. / (1 + Math.exp(-InnerProduct(result,
 					instances.get(index).x)));
-			/*
-			 * for (Double d : result) { System.out.format("%f ", d); } for
-			 * (Double d : instances.get(index).x) { System.out.format("%f ",
-			 * d); }
-			 */
+
 			Double compensation = 1.;
 			if (instances.get(index).y == 1)
 				compensation = 4.00;

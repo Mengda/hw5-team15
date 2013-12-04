@@ -43,11 +43,12 @@ public class chunkScoreCalculator {
   }
 
   public static double ChunkSimilarity(String str1, String str2) {
+	  
     ArrayList<ArrayList<String>> question = CBExtractor(str1);
     ArrayList<ArrayList<String>> answer = CBExtractor(str2);
     double maxScore = calculateChunkScore(question, answer) / 1.5;
     //System.out.println("max score is " + maxScore);
-    return maxScore;
+    return Math.max(maxScore , 0.01d);
   }
 
   private static ArrayList<ArrayList<String>> CBExtractor(String str) {
@@ -163,6 +164,7 @@ public class chunkScoreCalculator {
 
   public static String questionReform(String question)
   {
+question = question.replace("Which", "some");
     return question = question.replace("What", "some");
   }
   

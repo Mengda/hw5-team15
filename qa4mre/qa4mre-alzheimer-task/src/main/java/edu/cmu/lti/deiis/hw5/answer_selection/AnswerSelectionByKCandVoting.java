@@ -47,7 +47,7 @@ public class AnswerSelectionByKCandVoting extends JCasAnnotator_ImplBase {
     //ying
  
     PrintWriter ScoreWriter=null;
-    String outf="MLfolder/"+docId+"_score.txt";
+    String outf=docId+"_score.txt";
     try {
       ScoreWriter = new PrintWriter(outf, "UTF-8");
     } catch (FileNotFoundException e1) {

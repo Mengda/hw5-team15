@@ -125,7 +125,8 @@ public class AnswerChoiceCandAnsSimilarityScorer extends JCasAnnotator_ImplBase 
 					candAnswer.setText(answer.getText());
 					candAnswer.setQId(answer.getQuestionId());
 					candAnswer.setChoiceIndex(j);
-					candAnswer.setSimilarityScore(nnMatch*similarity);
+					candAnswer.setSimilarityScore(nnMatch);
+					candAnswer.setSynonymScore(nnMatch*similarity);
 					candAnsList.add(candAnswer);
 				}
 				
