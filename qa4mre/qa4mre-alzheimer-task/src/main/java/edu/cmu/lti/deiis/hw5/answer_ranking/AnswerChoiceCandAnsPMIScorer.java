@@ -117,7 +117,7 @@ public class AnswerChoiceCandAnsPMIScorer extends JCasAnnotator_ImplBase {
 					candAnswer.setText(answer.getText());
 					candAnswer.setQId(answer.getQuestionId());
 					candAnswer.setChoiceIndex(j);
-					candAnswer.setPMIScore(score1);
+					candAnswer.setPMIScore(score1+score1*candSent.getRelevanceScore());
 					candAnsList.add(candAnswer);
 				}
 				FSList fsCandAnsList = Utils.fromCollectionToFSList(aJCas,
