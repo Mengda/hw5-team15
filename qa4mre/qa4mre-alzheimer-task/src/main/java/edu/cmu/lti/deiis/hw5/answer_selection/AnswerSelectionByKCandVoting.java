@@ -44,21 +44,6 @@ public class AnswerSelectionByKCandVoting extends JCasAnnotator_ImplBase {
     int total = 0;
     int unanswered = 0;
     
-    //ying
- 
-    PrintWriter ScoreWriter=null;
-    String outf=docId+"_score.txt";
-    try {
-      ScoreWriter = new PrintWriter(outf, "UTF-8");
-    } catch (FileNotFoundException e1) {
-      // TODO Auto-generated catch block
-      e1.printStackTrace();
-    } catch (UnsupportedEncodingException e1) {
-      // TODO Auto-generated catch block
-      e1.printStackTrace();
-    }
-   
-    //ying
     
     for (int i = 0; i < qaSet.size(); i++) {
 
@@ -97,22 +82,9 @@ public class AnswerSelectionByKCandVoting extends JCasAnnotator_ImplBase {
           CandidateAnswer candAns = candAnswerList.get(j);
           String answer = candAns.getText();
 
-          double totalScore = candAns.getSimilarityScore() + candAns.getSynonymScore()
+          double totalScore = 0.13 * candAns.getSimilarityScore() + 0.02 * candAns.getSynonymScore()
                   + candAns.getPMIScore();
           
-          //ying
-          String summary=new String();
-          if (candAns.getText().equals(correct)) {
-            summary+="1 ";
-          } else {summary+="0 ";}
-          summary+=candAns.getSimilarityScore();
-          summary+=" ";
-          summary+=candAns.getSynonymScore();
-          summary+=" ";
-          summary+=candAns.getPMIScore();
-          ScoreWriter.println(summary);
-          //ying
-        
           if (totalScore > maxScore) {
             maxScore = totalScore;
             selectedAnswer = answer;
@@ -132,8 +104,6 @@ public class AnswerSelectionByKCandVoting extends JCasAnnotator_ImplBase {
       } catch (Exception e) {
         e.printStackTrace();
       }
-      System.out.println("Correct Choice: " + "\t" + correct);
-      System.out.println("Best Choice: " + "\t" + bestChoice);
 
       if (bestChoice == null) {
         unanswered++;
@@ -154,7 +124,6 @@ public class AnswerSelectionByKCandVoting extends JCasAnnotator_ImplBase {
     double cAt1 = (((double) matched) / ((double) total) * unanswered + (double) matched)
             * (1.0 / total);
     System.out.println("c@1 score:" + cAt1);
-    ScoreWriter.close();
 
   }
 
@@ -163,11 +132,9 @@ public class AnswerSelectionByKCandVoting extends JCasAnnotator_ImplBase {
     Iterator<String> it = hshAnswer.keySet().iterator();
     String bestAns = null;
     double maxScore = 0;
-    System.out.println("Aggregated counts; ");
     while (it.hasNext()) {
       String key = it.next();
       Double val = hshAnswer.get(key);
-      System.out.println(key + "\t" + key + "\t" + val);
       if (val > maxScore) {
         maxScore = val;
         bestAns = key;

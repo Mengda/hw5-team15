@@ -60,7 +60,7 @@ public class AnswerChoiceCandAnsPMIScorer extends JCasAnnotator_ImplBase {
 		for (int i = 0; i < qaSet.size(); i++) {
 
 			Question question = qaSet.get(i).getQuestion();
-			System.out.println("Question: " + question.getText());
+			System.out.println("PMI, Question: " + question.getText());
 			ArrayList<Answer> choiceList = Utils.fromFSListToCollection(qaSet
 					.get(i).getAnswerList(), Answer.class);
 			ArrayList<CandidateSentence> candSentList = Utils
@@ -104,8 +104,6 @@ public class AnswerChoiceCandAnsPMIScorer extends JCasAnnotator_ImplBase {
 						}
 
 					}
-
-					System.out.println(answer.getText() + "\t" + score1);
 
 					CandidateAnswer candAnswer = null;
 					if (candSent.getCandAnswerList() == null) {
