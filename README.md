@@ -1,6 +1,6 @@
 Team member:
 Mengda Yang
 Shen Wu
-SY
+Ying Sheng
 Qiwen Zhu
 Song Yi
