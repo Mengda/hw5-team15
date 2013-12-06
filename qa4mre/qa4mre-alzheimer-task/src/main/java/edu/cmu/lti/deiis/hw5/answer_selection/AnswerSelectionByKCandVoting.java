@@ -37,13 +37,11 @@ public class AnswerSelectionByKCandVoting extends JCasAnnotator_ImplBase {
     TestDocument testDoc = Utils.getTestDocumentFromCAS(aJCas);
     //ying
     String docId = testDoc.getId();
-   //ying
     ArrayList<QuestionAnswerSet> qaSet = Utils.fromFSListToCollection(testDoc.getQaList(),
             QuestionAnswerSet.class);
     int matched = 0;
     int total = 0;
     int unanswered = 0;
-    
     //ying
  
     PrintWriter ScoreWriter=null;
@@ -96,7 +94,9 @@ public class AnswerSelectionByKCandVoting extends JCasAnnotator_ImplBase {
 
           CandidateAnswer candAns = candAnswerList.get(j);
           String answer = candAns.getText();
-
+          
+  
+          
           double totalScore = candAns.getSimilarityScore() + candAns.getSynonymScore()
                   + candAns.getPMIScore();
           
@@ -134,14 +134,24 @@ public class AnswerSelectionByKCandVoting extends JCasAnnotator_ImplBase {
       }
       System.out.println("Correct Choice: " + "\t" + correct);
       System.out.println("Best Choice: " + "\t" + bestChoice);
-
+      
       if (bestChoice == null) {
         unanswered++;
       }
       if (bestChoice != null && correct.equals(bestChoice)) {
         matched++;
-
       }
+      //YING START
+      if (bestChoice !=null) {
+        for (int j = 0; j < choiceList.size(); j++) {
+          Answer answer = choiceList.get(j);
+          if (answer.getText().equals(bestChoice)) {
+            answer.setIsSelected(true);
+            break;
+          }
+        }
+      }
+      //YING END
       total++;
       System.out.println("================================================");
 
