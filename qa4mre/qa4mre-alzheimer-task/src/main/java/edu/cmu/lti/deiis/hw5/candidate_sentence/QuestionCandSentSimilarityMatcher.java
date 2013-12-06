@@ -62,12 +62,12 @@ public class QuestionCandSentSimilarityMatcher  extends JCasAnnotator_ImplBase{
 		for(int i=0;i<qaSet.size();i++){
 					
 			Question question=qaSet.get(i).getQuestion();
-			//YingSheng ms2 start
+			//YingSheng ms2 start, get rid of the sentence has noun of the answer's any token 
 			ArrayList<Answer> answerList=Utils.fromFSListToCollection(qaSet.get(i).getAnswerList(), Answer.class);
 			//YingSheng ms2 end
 			System.out.println("========================================================");
 			System.out.println("Question: "+question.getText());
-			//ysheng ms2.5
+			//ysheng ms2.5: add answer to search list to retrieve candidate answer
 			String searchQuery=this.formSolrQuery(question,answerList);
 			//ysheng ms2.5
 			if(searchQuery.trim().equals("")){
@@ -111,7 +111,7 @@ public class QuestionCandSentSimilarityMatcher  extends JCasAnnotator_ImplBase{
 					  if (!containsCandAns) {break;}
 					}
 					if (!containsCandAns) {continue;}		
-					*/			
+					*/		
 					//YingSheng ms2 end
 					
 					double relScore=Double.parseDouble(doc.get("score").toString());
@@ -146,9 +146,11 @@ public class QuestionCandSentSimilarityMatcher  extends JCasAnnotator_ImplBase{
 		ArrayList<NounPhrase>nounPhrases=Utils.fromFSListToCollection(question.getNounList(), NounPhrase.class);
 		
 		//ysheng 2.5 START
+		/*
 		for (int i=0; i<answerList.size(); i++) {
 		  nounPhrases.addAll(Utils.fromFSListToCollection(answerList.get(i).getNounPhraseList(), NounPhrase.class));
 		}
+		*/
 		//ysheng 2.5 END
 		
 		for(int i=0;i<nounPhrases.size();i++){
@@ -158,16 +160,18 @@ public class QuestionCandSentSimilarityMatcher  extends JCasAnnotator_ImplBase{
 		ArrayList<NER>neList=Utils.fromFSListToCollection(question.getNerList(), NER.class);
 		
     //ysheng 2.5 START
-    for (int i=0; i<answerList.size(); i++) {
+    /*
+		for (int i=0; i<answerList.size(); i++) {
       neList.addAll(Utils.fromFSListToCollection(answerList.get(i).getNerList(), NER.class));
     }
+    */
     //ysheng 2.5 END
 		
 		for(int i=0;i<neList.size();i++){
 			solrQuery+="namedentities:\""+neList.get(i).getText()+"\" ";
 		}
 		
-		//yingsheng-baseline-start
+		//yingsheng-ms1-start
 		
 		ArrayList<Dependency> dpList = Utils
             .fromFSListToCollection(question.getDependencies(),
@@ -180,7 +184,7 @@ public class QuestionCandSentSimilarityMatcher  extends JCasAnnotator_ImplBase{
 		  solrQuery+="dependencies:\""+depText+"\" ";
 		}
 		
-		//yingsheng-baseline-end
+		//yingsheng-ms1-end
 		solrQuery=solrQuery.trim();
 		
 		

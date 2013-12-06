@@ -39,7 +39,7 @@ public class AnswerChoiceCandAnsSimilarityScorer extends JCasAnnotator_ImplBase 
 		for (int i = 0; i < qaSet.size(); i++) {// each question
 
 			Question question = qaSet.get(i).getQuestion();
-			System.out.println("Question: " + question.getText());
+			System.out.println("Similarity, Question: " + question.getText());
 			ArrayList<Answer> choiceList = Utils.fromFSListToCollection(qaSet
 					.get(i).getAnswerList(), Answer.class);
 			ArrayList<CandidateSentence> candSentList = Utils
@@ -58,10 +58,7 @@ public class AnswerChoiceCandAnsSimilarityScorer extends JCasAnnotator_ImplBase 
 				//
 				
 				double similarity = chunkScoreCalculator.AnswerSimilarity(candSent.getSentence().getText() );
-				System.out.println(tmpQuestion);
-				System.out.println(candSent.getSentence().getText());
 
-				System.out.println("similarity is: " + similarity);
 				//
 				
 				
@@ -113,7 +110,6 @@ public class AnswerChoiceCandAnsSimilarityScorer extends JCasAnnotator_ImplBase 
 
 					}
 
-					System.out.println(choiceList.get(j).getText() + "\t" + nnMatch*similarity);
 					CandidateAnswer candAnswer = null;
 					if (candSent.getCandAnswerList() == null) {
 						candAnswer = new CandidateAnswer(aJCas);

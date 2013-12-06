@@ -24,6 +24,7 @@ import edu.cmu.lti.qalab.types.Answer;
 import edu.cmu.lti.qalab.types.Question;
 import edu.cmu.lti.qalab.types.QuestionAnswerSet;
 import edu.cmu.lti.qalab.types.TestDocument;
+import edu.cmu.lti.qalab.utils.Utils;
 
 public class OutputRunCasConsumer extends CasConsumer_ImplBase {
 
@@ -45,7 +46,7 @@ public class OutputRunCasConsumer extends CasConsumer_ImplBase {
 	/**
 	 * for writing to the output format.
 	 */
-	String team_id = "cmuq"; // TBD: needs to be replaced by real team id in the
+	String team_id = "team15_"; // TBD: needs to be replaced by real team id in the
 								// task.
 	int current_year = 13;
 	String number_of_run = "01"; // TBD: needs to be passed in from the
@@ -110,7 +111,7 @@ public class OutputRunCasConsumer extends CasConsumer_ImplBase {
 
 	@Override
 	public void processCas(CAS aCAS) throws ResourceProcessException {
-		// DEBUG System.out.println("!!!Entered here!!!");
+		//DEBUG System.out.println("!!!Entered here!!!");
 
 		JCas jcas;
 		try {
@@ -118,8 +119,13 @@ public class OutputRunCasConsumer extends CasConsumer_ImplBase {
 		} catch (CASException e) {
 			throw new ResourceProcessException(e);
 		}
-
-
+		/*
+		TestDocument srcDoc = Utils.getTestDocumentFromCAS(jcas);
+    
+    String docId = srcDoc.getId();
+    String outFileName = docId + ".xmi";
+    System.out.println(outFileName);
+    */
 		// serialize XCAS and write to output file
 		try {
 			writeToFile(jcas, out);
@@ -129,6 +135,8 @@ public class OutputRunCasConsumer extends CasConsumer_ImplBase {
 		}
 	}
 
+	
+	
 	/**
 	 * (1). determine whether the question is answered correctly, or unanswered,
 	 * or answered not correctly..
@@ -147,21 +155,24 @@ public class OutputRunCasConsumer extends CasConsumer_ImplBase {
 	 *             if an error occurs generating the XML text
 	 */
 	private void writeToFile(JCas jcas, BufferedWriter bw) throws IOException {
-
-		FSIterator<Annotation> it = jcas.getAnnotationIndex().iterator();
+	  
+	  TestDocument doc = Utils.getTestDocumentFromCAS(jcas);
+	  
+		//FSIterator<Annotation> it = jcas.getAnnotationIndex().iterator();
 		StringBuffer sb = new StringBuffer();
 		int testId=1;
-		while (it.hasNext()) {
-			Annotation an = (it.next());
+//		while (it.hasNext()) {
+	//		Annotation an = (it.next());
 			// System.out.println(an);
 
-			if (an instanceof TestDocument) {
-				TestDocument doc = (TestDocument) an;
+			//if (an instanceof TestDocument) {
+				//TestDocument doc = (TestDocument) an;
 				doc.setReadingTestId(String.valueOf(testId));
 				testId++;
 				//TBD: get reading-test id, such as r_id = doc.getReadingTestId()
 				System.out.println(doc.getReadingTestId());
 				out.write(String.format("\t<reading-test r_id=\"%d\">\n", Integer.parseInt(doc.getReadingTestId())));
+				out.write(String.format("\t<document doc_id=\"%d\">\n", Integer.parseInt(doc.getId())));
 				
 				FSList list = doc.getQaList();
 				boolean answered = false;
@@ -213,8 +224,8 @@ public class OutputRunCasConsumer extends CasConsumer_ImplBase {
 					list = ((NonEmptyFSList) list).getTail();
 				}
 				out.write("\t</reading-test>\n");
-			}
-		}
+		//	}
+//		}
 
 	}
 

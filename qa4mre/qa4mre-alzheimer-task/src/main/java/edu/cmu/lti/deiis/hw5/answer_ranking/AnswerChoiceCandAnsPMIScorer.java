@@ -29,16 +29,17 @@ public class AnswerChoiceCandAnsPMIScorer extends JCasAnnotator_ImplBase {
 
 	private SolrWrapper solrWrapper;
 	HashSet<String> hshStopWords = new HashSet<String>();
-	int K_CANDIDATES=5;
-	
+	int K_CANDIDATES = 5;
+
 	@Override
 	public void initialize(UimaContext context)
 			throws ResourceInitializationException {
 		super.initialize(context);
 		String serverUrl = (String) context
 				.getConfigParameterValue("SOLR_SERVER_URL");
-		K_CANDIDATES=(Integer)context.getConfigParameterValue("K_CANDIDATES");
-		
+		K_CANDIDATES = (Integer) context
+				.getConfigParameterValue("K_CANDIDATES");
+
 		try {
 			this.solrWrapper = new SolrWrapper(serverUrl);
 			// loadStopWords(stopFile);
@@ -52,14 +53,14 @@ public class AnswerChoiceCandAnsPMIScorer extends JCasAnnotator_ImplBase {
 	public void process(JCas aJCas) throws AnalysisEngineProcessException {
 
 		TestDocument testDoc = Utils.getTestDocumentFromCAS(aJCas);
-		//String testDocId = testDoc.getId();
+		// String testDocId = testDoc.getId();
 		ArrayList<QuestionAnswerSet> qaSet = Utils
 				.getQuestionAnswerSetFromTestDocCAS(aJCas);
 
 		for (int i = 0; i < qaSet.size(); i++) {
 
 			Question question = qaSet.get(i).getQuestion();
-			System.out.println("Question: " + question.getText());
+			System.out.println("PMI, Question: " + question.getText());
 			ArrayList<Answer> choiceList = Utils.fromFSListToCollection(qaSet
 					.get(i).getAnswerList(), Answer.class);
 			ArrayList<CandidateSentence> candSentList = Utils
@@ -78,7 +79,7 @@ public class AnswerChoiceCandAnsPMIScorer extends JCasAnnotator_ImplBase {
 				ArrayList<NER> candSentNers = Utils.fromFSListToCollection(
 						candSent.getSentence().getNerList(), NER.class);
 
-				ArrayList<CandidateAnswer>candAnsList=new ArrayList<CandidateAnswer>();
+				ArrayList<CandidateAnswer> candAnsList = new ArrayList<CandidateAnswer>();
 				for (int j = 0; j < choiceList.size(); j++) {
 					double score1 = 0.0;
 					Answer answer = choiceList.get(j);
@@ -86,7 +87,7 @@ public class AnswerChoiceCandAnsPMIScorer extends JCasAnnotator_ImplBase {
 					for (int k = 0; k < candSentNouns.size(); k++) {
 						try {
 							score1 += scoreCoOccurInSameDoc(candSentNouns
-									.get(k).getText(), choiceList.get(j));
+									.get(k).getText(), answer);
 
 						} catch (Exception e) {
 							e.printStackTrace();
@@ -97,40 +98,42 @@ public class AnswerChoiceCandAnsPMIScorer extends JCasAnnotator_ImplBase {
 
 						try {
 							score1 += scoreCoOccurInSameDoc(candSentNers.get(k)
-									.getText(), choiceList.get(j));
+									.getText(), answer);
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
 
 					}
 
-					System.out.println(choiceList.get(j).getText() + "\t"
-							+ score1 + "\t" + ((score1)));
-
-					CandidateAnswer candAnswer=null;
-					if(candSent.getCandAnswerList()==null){
-						candAnswer=new CandidateAnswer(aJCas);
-					}else{
-						candAnswer=Utils.fromFSListToCollection(candSent.getCandAnswerList(),CandidateAnswer.class).get(j);//new CandidateAnswer(aJCas);;
+					CandidateAnswer candAnswer = null;
+					if (candSent.getCandAnswerList() == null) {
+						candAnswer = new CandidateAnswer(aJCas);
+					} else {
+						candAnswer = Utils.fromFSListToCollection(
+								candSent.getCandAnswerList(),
+								CandidateAnswer.class).get(j);// new
+																// CandidateAnswer(aJCas);;
 					}
 					candAnswer.setText(answer.getText());
 					candAnswer.setQId(answer.getQuestionId());
 					candAnswer.setChoiceIndex(j);
-					candAnswer.setPMIScore(score1);
+					candAnswer.setPMIScore(score1+score1*candSent.getRelevanceScore());
 					candAnsList.add(candAnswer);
 				}
-				FSList fsCandAnsList=Utils.fromCollectionToFSList(aJCas, candAnsList);
+				FSList fsCandAnsList = Utils.fromCollectionToFSList(aJCas,
+						candAnsList);
 				candSent.setCandAnswerList(fsCandAnsList);
 				candSentList.set(c, candSent);
 			}
 
 			System.out
 					.println("================================================");
-			FSList fsCandSentList=Utils.fromCollectionToFSList(aJCas, candSentList);
+			FSList fsCandSentList = Utils.fromCollectionToFSList(aJCas,
+					candSentList);
 			qaSet.get(i).setCandidateSentenceList(fsCandSentList);
 
 		}
-		FSList fsQASet=Utils.fromCollectionToFSList(aJCas, qaSet);
+		FSList fsQASet = Utils.fromCollectionToFSList(aJCas, qaSet);
 		testDoc.setQaList(fsQASet);
 
 	}
@@ -171,9 +174,7 @@ public class AnswerChoiceCandAnsPMIScorer extends JCasAnnotator_ImplBase {
 
 			query = choiceNounPhrase;
 			// System.out.println(query);
-			params = new HashMap<String, String>();
 			params.put("q", query);
-			params.put("rows", "1");
 			solrParams = new MapSolrParams(params);
 
 			long nHits1 = 0;
@@ -199,9 +200,9 @@ public class AnswerChoiceCandAnsPMIScorer extends JCasAnnotator_ImplBase {
 				score += (double) combinedHits / nHits1;
 			}
 		}
-		if (choiceNounPhrases.size() > 0) {
+		//if (choiceNounPhrases.size() > 0) {
 			// score=score/choiceNounPhrases.size();
-		}
+		//}
 		return score;
 	}
 
